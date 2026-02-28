@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import ProductReviewContainer from '@/components/ProductReview';
 
 // 1. Tell Next.js to revalidate data every hour (ISR)
 export const revalidate = 3600; 
@@ -41,7 +42,11 @@ export default async function ProductReviewPage(props: { params: Promise<{ sku: 
 
   const { data: product, error } = await supabase
     .from('products')
-    .select(`*, merchants (name)`)
+    .select(`
+      *, 
+      merchants (name),
+      reviews (content)
+    `)
     .eq('sku', sku)
     .single();
 
@@ -120,7 +125,7 @@ export default async function ProductReviewPage(props: { params: Promise<{ sku: 
 
       <div className="prose lg:prose-xl">
         <h2>Our Honest Review</h2>
-        <p>{product.description}</p>
+        <ProductReviewContainer reviewContent={product.reviews?.[0]?.content || "No reviews available."} />
       </div>
     </article>
   );
